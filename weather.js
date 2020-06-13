@@ -1,61 +1,61 @@
-$(document).ready(function () {
-    $("#btn").click(weather);
+let today = new Date();
+let weekday = [];
+weekday[0] = "Sunday";
+weekday[1] = "Monday";
+weekday[2] = "Tuesday";
+weekday[3] = "Wednesday";
+weekday[4] = "Thursday";
+weekday[5] = "Friday";
+weekday[6] = "Saturday";
 
-    function weather() {
-        var text = $("#txt1").val();
-        $.ajax({
-            url: "http://api.openweathermap.org/data/2.5/weather?q=" +
-                text +
-                "&units=metric" +
-                "&APPID=721f1bf7346d1594961b9f09569d150a",
-            type: "GET",
-            datatype: "jsonp",
-            success: function (data) {
-                console.log(data);
-                document.getElementById("show").innerHTML = data.main.temp + " &#8451;";
+let cityID = document.querySelector("#showPlace");
+let weatherID = document.querySelector("#showWeather");
+let iconID = document.querySelector("#icon");
+let TempID = document.querySelector("#showTemperature");
+let todayDate = new Date();
 
-                document.getElementById("show2").innerHTML =
-                    text + "," + data.sys.country;
+function show() {
+    let input = document.querySelector("#txt1");
+    fetch(
+            "https://api.openweathermap.org/data/2.5/weather?q=" +
+            input.value +
+            "&appid=a29f3e8ac743dc84ba392a7ebcb3a12c"
+        )
+        .then((response) => response.json())
+        .then((data) => {
+            let temperature = data["main"]["temp"];
+            let cityName = data["name"];
+            let desc = data["weather"][0]["description"];
+            let iconcode = data["weather"][0]["icon"];
+            let country = data["sys"]["country"];
+            console.log(data);
 
-                document.getElementById("show3").innerHTML =
-                    data.weather[0].description;
-                var icon =
-                    "http://openweathermap.org/img/w/" + data.weather[0].icon + ".png";
-                document.getElementById("icon").src = icon;
-                time();
-            },
-        });
+            cityID.innerHTML = cityName + ", " + country;
+            weatherID.innerHTML = desc;
+            TempID.innerHTML = temperature - 273.15 + "°C"; // convert kelvin to celcius
+
+            iconID.src = "http://openweathermap.org/img/w/" + iconcode + ".png";
+            input.value = "";
+            setTime();
+        })
+
+        .catch((err) => alert("Wrong city name!"));
+}
+
+function AddZero(value) {
+    //add zero when value is below 10
+    if (value < 10) {
+        value = "0" + value;
     }
-});
+    return value;
+}
 
-function time() {
-    //time function
-    var today = new Date(); //time object
-    var weekday = new Array(7); // to get day
-    weekday[0] = "Sunday";
-    weekday[1] = "Monday";
-    weekday[2] = "Tuesday";
-    weekday[3] = "Wednesday";
-    weekday[4] = "Thursday";
-    weekday[5] = "Friday";
-    weekday[6] = "Saturday";
-    var n = weekday[today.getDay()];
-    var h = today.getHours(); //hour
-    var m = today.getMinutes(); //minutes
-    var s = today.getSeconds(); //sec
-    var z = today.getDay();
-    var x = today.getMonth();
-    var y = today.getFullYear();
-    m = checkTime(m); //to add zero when value is below 10
-    s = checkTime(s); //          ""
-    document.getElementById("show1").innerHTML =
-        n + " , " + h + ":" + m + ":" + s; //time and day
-    var t = setTimeout(time, 500);
-} //
-function checkTime(i) {
-    //to add zero when value is below 10
-    if (i < 10) {
-        i = "0" + i;
-    }
-    return i;
+function setTime() {
+    let day = weekday[today.getDay()];
+    let hour = today.getHours();
+    let minute = AddZero(today.getMinutes()); //add zero when value is below 10
+    let second = AddZero(today.getSeconds());
+    document.querySelector("#showDayAndTime").innerHTML =
+        day + " , " + hour + ":" + minute + ":" + second;
+    window.setInterval(setTime, 1000);
 }
